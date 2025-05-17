@@ -13,7 +13,6 @@ export class UserService {
   }
   async save(user: Partial<User>) {
     const userInfo = await this.usersRepository.save(this.createEntity(user));
-    console.log(user, userInfo);
     // https://github.com/typeorm/typeorm/issues/4591#issuecomment-2082728501
     const { password, ...result } = userInfo;
     return result;

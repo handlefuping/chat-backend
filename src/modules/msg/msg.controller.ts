@@ -6,8 +6,6 @@ export class MsgController {
   constructor(private readonly msgService: MsgService) {}
   @Get(':id')
   findOne(@Param('id') id: string) {
-    console.log(id, 1111);
-
     return this.msgService.findOne(+id);
   }
 }

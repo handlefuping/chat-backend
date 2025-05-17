@@ -1,27 +1,24 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  ValidationPipe,
-} from '@nestjs/common';
-import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { Module, ValidationPipe } from '@nestjs/common';
 import { APP_FILTER, APP_INTERCEPTOR, APP_PIPE } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/filters/http-exception.filter';
 import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/user/entities/user.entity';
 import { CacheModule } from '@nestjs/cache-manager';
-import { redisClient } from './service/redisStore';
-import KeyvRedis, { Keyv, RedisClientType } from '@keyv/redis';
+import { RedisService } from './service/redis.service';
+import KeyvRedis, { Keyv } from '@keyv/redis';
 import { CoreModule } from './modules/core.module';
 import { SqlExceptionFilter } from './common/filters/sql-exception.filter';
+import { LoggerService } from './service/logger.service';
 @Module({
   imports: [
     CacheModule.registerAsync({
       isGlobal: true,
-      useFactory: () => {
+      useFactory: async () => {
+        const redis = new RedisService();
+        await redis.init();
         return {
-          stores: [new Keyv(new KeyvRedis(redisClient as RedisClientType))],
+          stores: [new Keyv(new KeyvRedis(redis.client))],
         };
       },
     }),
@@ -59,10 +56,7 @@ import { SqlExceptionFilter } from './common/filters/sql-exception.filter';
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
+    LoggerService,
   ],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}

@@ -1,15 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as session from 'express-session';
-import generateStore from './service/redisStore';
+import { RedisService } from './service/redis.service';
+import { LoggerService } from './service/logger.service';
 
 async function bootstrap() {
-  const store = await generateStore();
-  const app = await NestFactory.create(AppModule);
+  const redis = new RedisService();
+  await redis.init();
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true,
+  });
+  app.useLogger(app.get(LoggerService));
   app.use(
     session({
       secret: 'chat-backend',
-      store,
+      store: redis.store,
       resave: false,
       saveUninitialized: false,
       cookie: {
