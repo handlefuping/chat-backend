@@ -20,14 +20,12 @@ import { CACHE_MANAGER, CacheInterceptor } from '@nestjs/cache-manager';
 import { Cache } from 'cache-manager';
 import { SessionData } from 'express-session';
 import { AuthGuard } from 'src/common/guards/auth.guard';
-import { LoggerService } from 'src/service/logger.service';
 
 @Controller('user')
 export class UserController {
   constructor(
     private readonly userService: UserService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
-    private loggerService: LoggerService,
   ) {}
   @Post('create')
   createUser(@Body() body: CreateUserDto) {
@@ -46,7 +44,6 @@ export class UserController {
   @Get(':id')
   @UseInterceptors(CacheInterceptor)
   getUser(@Param('id') id: number) {
-    this.loggerService.log('查询用户-哈哈哈');
     return this.userService.getUser({ id });
   }
   @UseGuards(AuthGuard)

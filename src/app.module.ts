@@ -9,7 +9,10 @@ import { RedisService } from './service/redis.service';
 import KeyvRedis, { Keyv } from '@keyv/redis';
 import { CoreModule } from './modules/core.module';
 import { SqlExceptionFilter } from './common/filters/sql-exception.filter';
-import { LoggerService } from './service/logger.service';
+import { WinstonModule } from 'nest-winston';
+import { transports, format } from 'winston';
+const { combine, timestamp, json } = format;
+
 @Module({
   imports: [
     CacheModule.registerAsync({
@@ -31,6 +34,13 @@ import { LoggerService } from './service/logger.service';
       database: 'chat',
       entities: [User],
       synchronize: true,
+    }),
+    WinstonModule.forRoot({
+      format: combine(timestamp(), json()),
+      transports: [
+        new transports.File({ filename: 'error.log', level: 'error' }),
+        new transports.File({ filename: 'combined.log' }),
+      ],
     }),
     CoreModule,
   ],
@@ -56,7 +66,6 @@ import { LoggerService } from './service/logger.service';
       provide: APP_INTERCEPTOR,
       useClass: LoggingInterceptor,
     },
-    LoggerService,
   ],
 })
 export class AppModule {}

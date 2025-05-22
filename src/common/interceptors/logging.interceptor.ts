@@ -1,22 +1,27 @@
 import {
   CallHandler,
   ExecutionContext,
+  Inject,
   Injectable,
   NestInterceptor,
 } from '@nestjs/common';
 import { map, Observable } from 'rxjs';
-import { LoggerService } from 'src/service/logger.service';
+import { WINSTON_MODULE_PROVIDER } from 'nest-winston';
+import { Logger } from 'winston';
 import { Request } from 'express';
 @Injectable()
 export class LoggingInterceptor implements NestInterceptor {
-  constructor(private loggerService: LoggerService) {}
+  constructor(
+    @Inject(WINSTON_MODULE_PROVIDER) private readonly logger: Logger,
+  ) {}
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const request = context.switchToHttp().getRequest<Request>();
-    this.loggerService.log({
+    this.logger.info({
       http: 'request',
       userId: request.session.userInfo?.id,
       url: request.url,
       query: request.query,
+      // TODO:
       body: request.body,
     });
     return next.handle().pipe(
@@ -27,12 +32,7 @@ export class LoggingInterceptor implements NestInterceptor {
           data,
           timestamp: Date.now(),
         };
-        this.loggerService.log({
-          http: 'response',
-          userId: request.session.userInfo?.id,
-          url: request.url,
-          data: response,
-        });
+
         return response;
       }),
     );

@@ -2,7 +2,7 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import * as session from 'express-session';
 import { RedisService } from './service/redis.service';
-import { LoggerService } from './service/logger.service';
+import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
 
 async function bootstrap() {
   const redis = new RedisService();
@@ -10,7 +10,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
-  app.useLogger(app.get(LoggerService));
+  app.useLogger(app.get(WINSTON_MODULE_NEST_PROVIDER));
   app.use(
     session({
       secret: 'chat-backend',

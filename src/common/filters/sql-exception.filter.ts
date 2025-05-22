@@ -5,13 +5,12 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { LoggerService } from 'src/service/logger.service';
 import { TypeORMError } from 'typeorm';
 @Catch(TypeORMError)
 export class SqlExceptionFilter<T extends TypeORMError>
   implements ExceptionFilter
 {
-  constructor(private loggerService: LoggerService) {}
+  constructor() {}
   catch(exception: T, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
     const response = ctx.getResponse<Response>();
@@ -24,6 +23,5 @@ export class SqlExceptionFilter<T extends TypeORMError>
       timestamp: Date.now(),
     };
     response.status(status).json(responseData);
-    this.loggerService.error(responseData);
   }
 }
