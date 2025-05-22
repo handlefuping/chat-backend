@@ -35,6 +35,17 @@ const { combine, timestamp, json } = format;
       entities: [User],
       synchronize: true,
     }),
+    TypeOrmModule.forRoot({
+      name: 'copy',
+      type: 'mysql',
+      host: 'localhost',
+      port: 3306,
+      username: 'root',
+      password: 'root123456',
+      database: 'chat-copy',
+      entities: [User],
+      synchronize: true,
+    }),
     WinstonModule.forRoot({
       format: combine(timestamp(), json()),
       transports: [
